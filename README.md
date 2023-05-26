@@ -5,6 +5,7 @@
 # usage
 
 * Place the driver `Blackout.sys` in the same path as the executable
+* The executable should be run in the context of an administrator
 * Blackout.exe -p <process_id>
 * for windows defender keep the program running to prevent the service from restarting it
 
