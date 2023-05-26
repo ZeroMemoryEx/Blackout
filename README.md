@@ -1,7 +1,7 @@
 # Blackout
 
 * leveraging gmer driver to effectively disabling or killing EDRs and AVs.
-
+* https://www.loldrivers.io/drivers/7ce8fb06-46eb-4f4f-90d5-5518a6561f15/
 # usage
 
 * Blackout.exe -p <process_id>
