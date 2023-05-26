@@ -1,6 +1,6 @@
 # Blackout
 
-* leveraging vulnerabilities in the gmer.sys driver to effectively disabling or killing EDRs and AVs.
+* leveraging gmer.sys driver to effectively disabling or killing EDRs and AVs.
 
 # usage
 
