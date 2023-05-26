@@ -1,6 +1,7 @@
 # Blackout
 
 * leveraging gmer driver to effectively disabling or killing EDRs and AVs.
+* it bypass HVCI fluently
 * the sample is sourced from loldrivers https://www.loldrivers.io/drivers/7ce8fb06-46eb-4f4f-90d5-5518a6561f15/
 # usage
 
