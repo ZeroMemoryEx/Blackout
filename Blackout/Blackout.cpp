@@ -8,10 +8,10 @@
 
 #define TERMINSTE_PROCESS_IOCTL_CODE 0x9876C094
 
-int 
+int
 LoadDriver(
     char* driverPath
-) 
+)
 {
     SC_HANDLE hSCM, hService;
     const char* serviceName = "Blackout";
@@ -128,7 +128,7 @@ GetPID(
 int
 main(
     int argc,
-    char **argv
+    char** argv
 ) {
 
     if (argc != 3) {
@@ -146,8 +146,8 @@ main(
         printf("provided process id doesnt exist !!\n");
         return (-1);
     }
-        
-    
+
+
     WIN32_FIND_DATAA fileData;
     HANDLE hFind;
     char FullDriverPath[MAX_PATH];
@@ -163,7 +163,7 @@ main(
             printf("path not found !!\n");
             return(-1);
         }
-    }     
+    }
     else {
         printf("driver not found !!\n");
         return(-1);
@@ -208,7 +208,7 @@ main(
             {
                 if (!DeviceIoControl(hDevice, TERMINSTE_PROCESS_IOCTL_CODE, &input, sizeof(input), output, outputSize, &bytesReturned, NULL))
                 {
-                    printf("DeviceIoControl failed. Error: %X !!\n",GetLastError());
+                    printf("DeviceIoControl failed. Error: %X !!\n", GetLastError());
                     CloseHandle(hDevice);
                     return (-1);
                 }
@@ -224,26 +224,19 @@ main(
         }
     }
 
+    printf("terminating process !! \n");
+
     result = DeviceIoControl(hDevice, TERMINSTE_PROCESS_IOCTL_CODE, &input, sizeof(input), output, outputSize, &bytesReturned, NULL);
 
     if (!result)
     {
-        printf("DeviceIoControl failed. Error: %X !!\n", GetLastError());
-        CloseHandle(hDevice);
-        return (-1);
-    }
-
-    printf("terminating process !! \n");
-
-    if (!output){}
-    else
-    {
-        printf("error while terminating process !!\n");
+        printf("failed to terminate process: %X !!\n", GetLastError());
         CloseHandle(hDevice);
         return (-1);
     }
 
     printf("process has been terminated!\n");
+
     system("pause");
 
     CloseHandle(hDevice);
