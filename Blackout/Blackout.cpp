@@ -8,21 +8,53 @@
 
 #define TERMINSTE_PROCESS_IOCTL_CODE 0x9876C094
 
-int
-LoadDriver(
-    char* driverPath
-)
+BOOL LoadDriver(char* driverPath)
 {
     SC_HANDLE hSCM, hService;
     const char* serviceName = "Blackout";
 
     // Open a handle to the SCM database
-    hSCM = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+    hSCM = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
     if (hSCM == NULL) {
         printf("OpenSCManager failed %X\n", GetLastError());
-        return (-1);
+        return FALSE;
     }
 
+    // Check if the service already exists
+    hService = OpenServiceA(hSCM, serviceName, SERVICE_ALL_ACCESS);
+    if (hService != NULL)
+    {
+        printf("Service already exists.\n");
+
+        // Start the service if it's not running
+        SERVICE_STATUS serviceStatus;
+        if (!QueryServiceStatus(hService, &serviceStatus))
+        {
+            printf("QueryServiceStatus failed %X\n", GetLastError());
+            CloseServiceHandle(hService);
+            CloseServiceHandle(hSCM);
+            return FALSE;
+        }
+
+        if (serviceStatus.dwCurrentState == SERVICE_STOPPED)
+        {
+            if (!StartServiceA(hService, 0, nullptr))
+            {
+                printf("StartService failed %X\n", GetLastError());
+                CloseServiceHandle(hService);
+                CloseServiceHandle(hSCM);
+                return FALSE;
+            }
+
+            printf("Starting service...\n");
+        }
+
+        CloseServiceHandle(hService);
+        CloseServiceHandle(hSCM);
+        return 0;
+    }
+
+    // Create the service
     hService = CreateServiceA(
         hSCM,
         serviceName,
@@ -40,28 +72,30 @@ LoadDriver(
     );
 
     if (hService == NULL) {
-        if (GetLastError() == 1073)
-        {
-            StartServiceA(hService, 0, nullptr);
-            printf("starting service ..\n");
-            return (0);
-        }
-        else
-            printf("CreateService failed %X\n", GetLastError());
-        return (-1);
+        printf("CreateService failed %X\n", GetLastError());
+        CloseServiceHandle(hSCM);
+        return FALSE;
     }
 
     printf("Service created successfully.\n");
 
-    StartServiceA(hService, 0, nullptr);
+    // Start the service
+    if (!StartServiceA(hService, 0, nullptr))
+    {
+        printf("StartService failed %X\n", GetLastError());
+        CloseServiceHandle(hService);
+        CloseServiceHandle(hSCM);
+        return FALSE;
+    }
 
-    printf("starting service ..\n");
+    printf("Starting service...\n");
 
     CloseServiceHandle(hService);
     CloseServiceHandle(hSCM);
 
     return 0;
 }
+
 
 
 BOOL
