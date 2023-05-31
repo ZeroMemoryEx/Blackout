@@ -3,10 +3,24 @@
 #include <iostream>
 #include <Windows.h>
 #include <tlhelp32.h>
+#include <winternl.h>
+#include <psapi.h>
+#include <shlwapi.h>
 
 #define INITIALIZE_IOCTL_CODE 0x9876C004
 
 #define TERMINSTE_PROCESS_IOCTL_CODE 0x9876C094
+
+#pragma comment(lib, "ntdll.lib")
+#pragma comment(lib, "shlwapi.lib")
+
+typedef NTSTATUS (NTAPI * fNtGetNextProcess)(
+    _In_ HANDLE ProcessHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _In_ ULONG HandleAttributes,
+    _In_ ULONG Flags,
+    _Out_ PHANDLE NewProcessHandle
+);
 
 int
 LoadDriver(
@@ -99,28 +113,20 @@ GetPID(
     LPCWSTR pn)
 {
     DWORD procId = 0;
-    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    HANDLE current = NULL;
+    char procName[MAX_PATH];
 
-    if (hSnap != INVALID_HANDLE_VALUE)
-    {
-        PROCESSENTRY32 pE;
-        pE.dwSize = sizeof(pE);
+    // resolve function address
+    fNtGetNextProcess myNtGetNextProcess = (fNtGetNextProcess) GetProcAddress(GetModuleHandle("ntdll.dll"), "NtGetNextProcess");
 
-        if (Process32First(hSnap, &pE))
-        {
-            if (!pE.th32ProcessID)
-                Process32Next(hSnap, &pE);
-            do
-            {
-                if (!lstrcmpiW((LPCWSTR)pE.szExeFile, pn))
-                {
-                    procId = pE.th32ProcessID;
-                    break;
-                }
-            } while (Process32Next(hSnap, &pE));
+    // loop through all processes
+    while (!myNtGetNextProcess(current, MAXIMUM_ALLOWED, 0, 0, &current)) {
+        GetProcessImageFileNameA(current, pn, MAX_PATH);
+        if (lstrcmpiA(pn, PathFindFileName((LPCSTR) pn)) == 0) {
+            procId = GetProcessId(current);
+            break;
         }
     }
-    CloseHandle(hSnap);
     return (procId);
 }
 
