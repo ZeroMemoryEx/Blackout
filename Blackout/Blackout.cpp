@@ -8,7 +8,10 @@
 
 #define TERMINSTE_PROCESS_IOCTL_CODE 0x9876C094
 
-BOOL LoadDriver(char* driverPath)
+BOOL
+LoadDriver(
+    char* driverPath
+)
 {
     SC_HANDLE hSCM, hService;
     const char* serviceName = "Blackout";
@@ -17,7 +20,7 @@ BOOL LoadDriver(char* driverPath)
     hSCM = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
     if (hSCM == NULL) {
         printf("OpenSCManager failed %X\n", GetLastError());
-        return FALSE;
+        return (1);
     }
 
     // Check if the service already exists
@@ -33,7 +36,7 @@ BOOL LoadDriver(char* driverPath)
             printf("QueryServiceStatus failed %X\n", GetLastError());
             CloseServiceHandle(hService);
             CloseServiceHandle(hSCM);
-            return FALSE;
+            return (1);
         }
 
         if (serviceStatus.dwCurrentState == SERVICE_STOPPED)
@@ -43,7 +46,7 @@ BOOL LoadDriver(char* driverPath)
                 printf("StartService failed %X\n", GetLastError());
                 CloseServiceHandle(hService);
                 CloseServiceHandle(hSCM);
-                return FALSE;
+                return (1);
             }
 
             printf("Starting service...\n");
@@ -51,7 +54,7 @@ BOOL LoadDriver(char* driverPath)
 
         CloseServiceHandle(hService);
         CloseServiceHandle(hSCM);
-        return 0;
+        return (0);
     }
 
     // Create the service
@@ -74,7 +77,7 @@ BOOL LoadDriver(char* driverPath)
     if (hService == NULL) {
         printf("CreateService failed %X\n", GetLastError());
         CloseServiceHandle(hSCM);
-        return FALSE;
+        return (1);
     }
 
     printf("Service created successfully.\n");
@@ -85,7 +88,7 @@ BOOL LoadDriver(char* driverPath)
         printf("StartService failed %X\n", GetLastError());
         CloseServiceHandle(hService);
         CloseServiceHandle(hSCM);
-        return FALSE;
+        return (1);
     }
 
     printf("Starting service...\n");
@@ -93,7 +96,7 @@ BOOL LoadDriver(char* driverPath)
     CloseServiceHandle(hService);
     CloseServiceHandle(hSCM);
 
-    return 0;
+    return (0);
 }
 
 
@@ -224,7 +227,7 @@ main(
     DWORD output[2] = { 0 };
     DWORD outputSize = sizeof(output);
 
-    BOOL result = DeviceIoControl(hDevice, INITIALIZE_IOCTL_CODE, &input, sizeof(input), output, outputSize, &bytesReturned, NULL);//0x9876C094
+    BOOL result = DeviceIoControl(hDevice, INITIALIZE_IOCTL_CODE, &input, sizeof(input), output, outputSize, &bytesReturned, NULL);
     if (!result)
     {
         printf("faild to send initializing request %X !!\n", INITIALIZE_IOCTL_CODE);
