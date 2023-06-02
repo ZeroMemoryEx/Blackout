@@ -19,7 +19,6 @@ LoadDriver(
     // Open a handle to the SCM database
     hSCM = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
     if (hSCM == NULL) {
-        printf("OpenSCManager failed %X\n", GetLastError());
         return (1);
     }
 
@@ -33,7 +32,6 @@ LoadDriver(
         SERVICE_STATUS serviceStatus;
         if (!QueryServiceStatus(hService, &serviceStatus))
         {
-            printf("QueryServiceStatus failed %X\n", GetLastError());
             CloseServiceHandle(hService);
             CloseServiceHandle(hSCM);
             return (1);
@@ -43,7 +41,6 @@ LoadDriver(
         {
             if (!StartServiceA(hService, 0, nullptr))
             {
-                printf("StartService failed %X\n", GetLastError());
                 CloseServiceHandle(hService);
                 CloseServiceHandle(hSCM);
                 return (1);
@@ -75,7 +72,6 @@ LoadDriver(
     );
 
     if (hService == NULL) {
-        printf("CreateService failed %X\n", GetLastError());
         CloseServiceHandle(hSCM);
         return (1);
     }
@@ -85,7 +81,6 @@ LoadDriver(
     // Start the service
     if (!StartServiceA(hService, 0, nullptr))
     {
-        printf("StartService failed %X\n", GetLastError());
         CloseServiceHandle(hService);
         CloseServiceHandle(hSCM);
         return (1);
